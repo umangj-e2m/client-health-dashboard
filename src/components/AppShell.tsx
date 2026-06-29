@@ -49,7 +49,7 @@ export function AppShell({ activeNav, title, titleIcon, children }: AppShellProp
           </a>
         </div>
 
-        <div className="flex-1 flex items-center justify-between px-8 h-full relative">
+        <div className="flex-1 flex items-center justify-between pl-2 pr-8 h-full relative">
           <div className="flex items-center gap-4">
             {/* Collapse toggle icon button next to logo */}
             <button
