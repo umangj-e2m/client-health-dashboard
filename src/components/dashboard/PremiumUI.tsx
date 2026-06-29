@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Activity, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import type { Client, HealthStatus } from '../../data/clients';
 
 const AVATAR_COLORS: Record<HealthStatus, string> = {
@@ -28,24 +28,24 @@ export function PremiumCard({
   action?: React.ReactNode;
 }) {
   return (
-    <section className={`bg-white rounded-2xl shadow-[0_8px_30px_rgba(20,47,69,0.06)] border border-slate-100/80 overflow-hidden ${className}`}>
+    <section className={`bg-white rounded-2xl shadow-[0_8px_30px_rgba(20,47,69,0.04)] border border-slate-100/90 overflow-hidden hover:shadow-[0_16px_40px_rgba(20,47,69,0.06)] hover:-translate-y-[2px] transition-all duration-300 flex flex-col ${className}`}>
       {(title || action) && (
-        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+        <div className="px-6 py-4.5 flex items-center justify-between border-b border-slate-100/80 bg-slate-50/10">
           <div className="flex items-center gap-3">
             {icon && (
-              <div className="w-9 h-9 rounded-xl bg-[#142f45]/5 flex items-center justify-center text-[#142f45]">
+              <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-[#142f45]">
                 {icon}
               </div>
             )}
             <div>
-              {title && <h2 className="font-bold text-[#142f45] text-base">{title}</h2>}
-              {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+              {title && <h2 className="font-bold text-[#142f45] text-sm md:text-base tracking-tight">{title}</h2>}
+              {subtitle && <p className="text-xs text-slate-400 font-medium mt-0.5">{subtitle}</p>}
             </div>
           </div>
           {action}
         </div>
       )}
-      <div className="p-6">{children}</div>
+      <div className="p-6 flex-1">{children}</div>
     </section>
   );
 }
@@ -64,16 +64,19 @@ export function KpiStatCard({
   bg?: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(20,47,69,0.06)] border border-slate-100/80 p-5 flex items-center gap-4">
+    <div
+      className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(20,47,69,0.04)] border border-slate-100 p-5 flex items-center gap-4 hover:shadow-[0_16px_36px_rgba(20,47,69,0.08)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden border-t-4"
+      style={{ borderTopColor: accent }}
+    >
       <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
         style={{ backgroundColor: `${bg}12`, color: accent }}
       >
         {icon}
       </div>
       <div>
-        <div className="text-2xl font-bold text-[#142f45] leading-none">{value}</div>
-        <div className="text-sm text-slate-500 mt-1 font-medium">{label}</div>
+        <div className="text-3xl font-extrabold text-[#142f45] tracking-tight leading-none">{value}</div>
+        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1.5">{label}</div>
       </div>
     </div>
   );
@@ -150,45 +153,94 @@ export function ClientListRow({ client, onClick }: { client: Client; onClick: ()
     { label: 'Delivery', value: client.breakdown.delivery },
   ];
 
+  // Colors based on client status
+  const statusColors = {
+    green: {
+      bar: 'bg-emerald-500',
+      avatar: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+      text: 'text-emerald-600',
+      badge: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+    },
+    yellow: {
+      bar: 'bg-amber-400',
+      avatar: 'bg-amber-50 text-amber-600 ring-amber-100',
+      text: 'text-amber-600',
+      badge: 'bg-amber-50 text-amber-700 border-amber-100',
+    },
+    red: {
+      bar: 'bg-rose-500',
+      avatar: 'bg-rose-50 text-rose-600 ring-rose-100',
+      text: 'text-rose-600',
+      badge: 'bg-rose-50 text-rose-700 border-rose-100',
+    },
+  };
+
+  const currentColors = statusColors[client.status] || statusColors.green;
+
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50/90 transition-colors border-b border-slate-100 last:border-0 bg-transparent border-x-0 border-t-0 cursor-pointer text-left group"
+      className="w-full bg-white rounded-xl shadow-[0_4px_12px_rgba(20,47,69,0.02)] border border-slate-100 hover:border-slate-200 hover:shadow-[0_8px_24px_rgba(20,47,69,0.05)] hover:-translate-y-[1px] transition-all duration-200 text-left cursor-pointer flex items-center p-4 relative overflow-hidden group"
     >
-      <div className={`w-11 h-11 rounded-xl ring-2 flex items-center justify-center text-sm font-bold shrink-0 ${AVATAR_COLORS[client.status]}`}>
-        {clientInitials(client.name)}
+      {/* Left Status Bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-[5px] ${currentColors.bar}`} />
+
+      {/* Left Side: Avatar and Client Info */}
+      <div className="flex items-center gap-4 flex-1 md:flex-none md:w-[260px] min-w-0 pl-1">
+        <div className={`w-11 h-11 rounded-xl ring-2 flex items-center justify-center text-sm font-bold shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-105 ${currentColors.avatar}`}>
+          {clientInitials(client.name)}
+        </div>
+
+        <div className="min-w-0 pr-4">
+          <div className="font-bold text-[#142f45] text-sm group-hover:text-[#ee683b] transition-colors truncate">
+            {client.name}
+          </div>
+          <div className="text-xs text-slate-400 font-medium mt-0.5 truncate">
+            {client.category} - {client.accountManager}
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="font-semibold text-[#142f45] text-sm group-hover:text-[#ee683b] transition-colors truncate">
-          {client.name}
-        </div>
-        <div className="text-xs text-slate-500 mt-0.5 truncate">
-          {client.category} · {client.accountManager}
-        </div>
-      </div>
+      {/* Separator 1 */}
+      <div className="h-10 w-[1px] bg-slate-100/80 shrink-0 hidden md:block" />
 
-      <div className="hidden md:flex items-center gap-3 shrink-0">
-        {metrics.map(m => {
-          const color = m.value >= 80 ? 'bg-emerald-500' : m.value >= 60 ? 'bg-amber-500' : 'bg-rose-500';
-          return (
-            <div key={m.label} className="w-16 text-center">
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1">
-                <div className={`h-full rounded-full ${color}`} style={{ width: `${m.value}%` }} />
-              </div>
-              <div className="text-[10px] text-slate-500 font-medium">{m.label}</div>
+      {/* Middle Section: Metrics bars */}
+      <div className="hidden md:flex flex-1 items-center justify-center gap-4 lg:gap-5 px-4 shrink-0">
+        {metrics.map(m => (
+          <div key={m.label} className="w-20 text-left">
+            <div className="flex items-baseline text-[9px] font-bold mb-1">
+              <span className="text-slate-400 uppercase tracking-wider">{m.label}</span>
+              <span className="text-[#142f45] ml-0.5">{m.value}%</span>
             </div>
-          );
-        })}
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${currentColors.bar}`} style={{ width: `${m.value}%` }} />
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="flex items-center gap-4 shrink-0">
-        <HealthRing score={client.healthScore} size={48} />
-        <span className={`text-sm font-bold w-12 text-right hidden sm:block ${trendUp ? 'text-emerald-600' : trendDown ? 'text-rose-600' : 'text-slate-400'}`}>
+      {/* Separator 2 */}
+      <div className="h-10 w-[1px] bg-slate-100/80 shrink-0 hidden sm:block" />
+
+      {/* Right Section: Health Ring, Monthly Change, Risk Pill */}
+      <div className="flex items-center justify-end md:justify-center gap-3 md:gap-5 flex-none md:w-[260px] px-2 md:px-6 shrink-0">
+        <HealthRing score={client.healthScore} size={44} />
+        
+        <span className={`text-sm font-extrabold w-10 text-right hidden sm:block ${trendUp ? 'text-emerald-600' : trendDown ? 'text-rose-600' : 'text-slate-400'}`}>
           {trendUp ? '+' : ''}{client.monthlyChange}
         </span>
-        <RiskPill risk={client.risk} />
-        <ChevronRight size={18} className="text-slate-300 group-hover:text-[#142f45] shrink-0" />
+
+        <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${currentColors.badge}`}>
+          {client.risk} Risk
+        </span>
+      </div>
+
+      {/* Separator 3 */}
+      <div className="h-10 w-[1px] bg-slate-100/80 shrink-0" />
+
+      {/* Far Right: Chevron Arrow */}
+      <div className="w-10 md:w-12 shrink-0 flex items-center justify-center">
+        <ChevronRight size={18} className="text-slate-300 group-hover:text-[#142f45] transition-colors shrink-0" />
       </div>
     </button>
   );
@@ -232,20 +284,25 @@ export function ClientStatusBoard({
   onClientClick: (name: string) => void;
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(20,47,69,0.06)] border border-slate-100/80 overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-bold text-[#142f45] text-lg">Client Health Overview</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Grouped by status — click any client to open their dashboard</p>
+    <section className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(20,47,69,0.04)] border border-slate-100/90 overflow-hidden hover:shadow-[0_16px_40px_rgba(20,47,69,0.06)] hover:-translate-y-[2px] transition-all duration-300">
+      <div className="px-6 py-4.5 border-b border-slate-100/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/10">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-[#142f45]">
+            <Activity size={18} />
+          </div>
+          <div>
+            <h2 className="font-bold text-[#142f45] text-sm md:text-base tracking-tight">Client Health Overview</h2>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">Grouped by status — click any client to open their dashboard</p>
+          </div>
         </div>
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-xs font-semibold uppercase tracking-wider">
           {STATUS_GROUPS.map(g => {
             const count = clients.filter(g.filter).length;
             return (
               <div key={g.key} className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${g.dot}`} />
-                <span className="text-slate-600">{g.label}</span>
-                <span className="font-bold text-[#142f45]">{count}</span>
+                <span className="text-slate-400">{g.label}</span>
+                <span className="font-extrabold text-[#142f45]">{count}</span>
               </div>
             );
           })}
@@ -253,44 +310,60 @@ export function ClientStatusBoard({
       </div>
 
       {/* Distribution bar */}
-      <div className="px-6 py-3 bg-slate-50/50 border-b border-slate-100">
-        <div className="flex h-2.5 rounded-full overflow-hidden">
+      <div className="px-6 py-4 bg-slate-50/20 border-b border-slate-100">
+        <div className="flex h-3 bg-slate-100/70 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.04)]">
           {STATUS_GROUPS.map(g => {
             const count = clients.filter(g.filter).length;
             const pct = (count / clients.length) * 100;
             if (pct === 0) return null;
-            const barColor = g.key === 'critical' ? 'bg-rose-500' : g.key === 'watchlist' ? 'bg-amber-400' : 'bg-emerald-500';
-            return <div key={g.key} className={barColor} style={{ width: `${pct}%` }} title={`${g.label}: ${count}`} />;
+            const barColor = g.key === 'critical' ? 'bg-rose-500 shadow-[0_0_12px_rgba(239,68,68,0.2)]' : g.key === 'watchlist' ? 'bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.2)]' : 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.2)]';
+            return <div key={g.key} className={`${barColor} transition-all duration-300`} style={{ width: `${pct}%` }} title={`${g.label}: ${count}`} />;
           })}
         </div>
       </div>
 
-      {STATUS_GROUPS.map(g => {
-        const groupClients = clients.filter(g.filter).sort(g.sort);
-        if (groupClients.length === 0) return null;
+      <div className="p-6 bg-slate-50/20 space-y-8">
+        {STATUS_GROUPS.map(g => {
+          const groupClients = clients.filter(g.filter).sort(g.sort);
+          if (groupClients.length === 0) return null;
 
-        return (
-          <div key={g.key}>
-            <div className={`px-6 py-3 border-b flex items-center justify-between ${g.header}`}>
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${g.dot}`} />
-                <span className="font-bold text-sm">{g.label}</span>
-                <span className="text-xs opacity-70">· {g.description}</span>
+          const headerColor = g.key === 'critical' ? 'text-rose-600' : g.key === 'watchlist' ? 'text-amber-500' : 'text-emerald-600';
+          const badgeBgColor = g.key === 'critical' ? 'bg-rose-50 text-rose-700 border-rose-100' : g.key === 'watchlist' ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100';
+          
+          let HeaderIcon = AlertCircle;
+          if (g.key === 'watchlist') HeaderIcon = AlertTriangle;
+          if (g.key === 'healthy') HeaderIcon = CheckCircle2;
+
+          return (
+            <div key={g.key} className="space-y-4">
+              {/* Category Header */}
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                <div className="flex items-center gap-2">
+                  <HeaderIcon size={18} className={headerColor} />
+                  <span className={`font-bold text-xs uppercase tracking-wider ${headerColor}`}>{g.label}</span>
+                  <span className="text-xs text-slate-400 font-medium">({g.description})</span>
+                </div>
+                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border ${badgeBgColor}`}>
+                  {groupClients.length} client{groupClients.length !== 1 ? 's' : ''}
+                </span>
               </div>
-              <span className="text-xs font-bold">{groupClients.length} client{groupClients.length !== 1 ? 's' : ''}</span>
+              
+              {/* Cards List */}
+              <div className="space-y-3">
+                {groupClients.map(client => (
+                  <div key={client.id}>
+                    <ClientListRow
+                      client={client}
+                      onClick={() => onClientClick(client.name)}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            {groupClients.map(client => (
-              <div key={client.id}>
-                <ClientListRow
-                  client={client}
-                  onClick={() => onClientClick(client.name)}
-                />
-              </div>
-            ))}
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -357,21 +430,38 @@ export function ListRow({
   valueAccent?: string;
   onClick?: () => void;
 }) {
-  const Tag = onClick ? 'button' : 'div';
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-200 cursor-pointer text-left border-0 bg-transparent group/row mb-1 last:mb-0"
+      >
+        {avatar}
+        <div className="flex-1 min-w-0">
+          <div className="font-bold text-[#142f45] text-sm group-hover/row:text-[#ee683b] transition-colors truncate">{title}</div>
+          {subtitle && <div className="text-xs text-slate-400 mt-0.5 font-medium truncate">{subtitle}</div>}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {value !== undefined && (
+            <div className={`text-sm font-extrabold ${valueAccent || 'text-[#142f45]'}`}>{value}</div>
+          )}
+          <ChevronRight size={14} className="text-slate-300 group-hover/row:text-[#142f45] transition-colors" />
+        </div>
+      </button>
+    );
+  }
+
   return (
-    <Tag
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 py-3 border-b border-slate-50 last:border-0 ${onClick ? 'hover:bg-slate-50/80 cursor-pointer bg-transparent border-x-0 border-t-0 text-left' : ''}`}
-    >
+    <div className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-50/50 bg-slate-50/20 mb-1 last:mb-0">
       {avatar}
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-[#142f45] text-sm truncate">{title}</div>
-        {subtitle && <div className="text-xs text-slate-500 mt-0.5">{subtitle}</div>}
+        <div className="font-bold text-[#142f45] text-sm truncate">{title}</div>
+        {subtitle && <div className="text-xs text-slate-400 mt-0.5 font-medium truncate">{subtitle}</div>}
       </div>
       {value !== undefined && (
-        <div className={`text-sm font-bold shrink-0 ${valueAccent || 'text-[#142f45]'}`}>{value}</div>
+        <div className={`text-sm font-extrabold shrink-0 ${valueAccent || 'text-[#142f45]'}`}>{value}</div>
       )}
-    </Tag>
+    </div>
   );
 }
 

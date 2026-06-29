@@ -38,10 +38,7 @@ export default function MainDashboard() {
 
         {/* KPI row */}
         <div>
-          <h1 className="text-2xl font-bold text-[#142f45] mb-1">Explore Media Client Health</h1>
-          <p className="text-slate-500 text-sm mb-6">Agency client accounts — monitor retainer health, campaign performance, and deliverables.</p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             <KpiStatCard label="Total Clients" value={stats.total} icon={<Users size={24} />} accent="#142f45" bg="#142f45" />
             <KpiStatCard label="Healthy Clients" value={stats.healthy} icon={<ShieldCheck size={24} />} accent="#10b981" bg="#10b981" />
             <KpiStatCard label="At-Risk Clients" value={stats.atRisk + stats.critical} icon={<AlertTriangle size={24} />} accent="#f59e0b" bg="#f59e0b" />
@@ -49,24 +46,17 @@ export default function MainDashboard() {
           </div>
         </div>
 
-        {/* Client status board + sidebar */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          <div className="xl:col-span-8">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+          {/* Left Column (2/3 width) */}
+          <div className="xl:col-span-8 flex flex-col">
             <ClientStatusBoard
               clients={ALL_CLIENTS}
               onClientClick={navigateToClientDashboard}
             />
-            <div className="mt-4 text-right">
-              <a
-                href="/clients.html"
-                className="inline-flex items-center gap-1 text-sm font-semibold text-[#142f45] hover:text-[#ee683b] no-underline transition-colors"
-              >
-                Open full client table <ChevronRight size={16} />
-              </a>
-            </div>
           </div>
 
-          <div className="xl:col-span-4 space-y-5">
+          {/* Right Column (1/3 width) */}
+          <div className="xl:col-span-4 flex flex-col space-y-6 h-full">
             <PremiumCard
               title="Needs Attention"
               subtitle={`${atRiskClients.length} clients flagged`}
@@ -109,7 +99,7 @@ export default function MainDashboard() {
               </div>
             </PremiumCard>
 
-            <PremiumCard title="Biggest Movers" icon={<TrendingUp size={18} />}>
+            <PremiumCard title="Biggest Movers" icon={<TrendingUp size={18} />} className="flex-1">
               <div className="space-y-4">
                 <div>
                   <div className="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-2 flex items-center gap-1">
@@ -132,9 +122,9 @@ export default function MainDashboard() {
           </div>
         </div>
 
-        {/* Analytics row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <PremiumCard title="Sentiment Overview" subtitle="Calls, meetings, emails & reviews" icon={<MessageSquare size={18} />}>
+        {/* Middle Row: Sentiment Overview + Communication Health + Delivery Health */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          <PremiumCard title="Sentiment Overview" subtitle="Calls, meetings, emails & reviews" icon={<MessageSquare size={18} />} className="h-full">
             <DonutChart
               segments={[
                 { label: 'Positive', value: sentimentPositive, color: '#10b981' },
@@ -142,12 +132,12 @@ export default function MainDashboard() {
                 { label: 'Negative', value: sentimentNegative, color: '#ef4444' },
               ]}
             />
-            <p className="text-sm text-slate-500 mt-5 pt-4 border-t border-slate-100">
+            <p className="text-sm text-slate-400 font-medium mt-5 pt-4 border-t border-slate-100">
               Sentiment slightly declining · Frustration rising in 3 clients
             </p>
           </PremiumCard>
 
-          <PremiumCard title="Communication Health" icon={<Phone size={18} />}>
+          <PremiumCard title="Communication Health" icon={<Phone size={18} />} className="h-full">
             <div className="space-y-1 -my-2">
               {commClients.map(c => (
                 <div key={c.id}>
@@ -167,42 +157,42 @@ export default function MainDashboard() {
             </div>
           </PremiumCard>
 
-          <PremiumCard title="Delivery Health" subtitle="From Hive / ClickUp" icon={<Truck size={18} />}>
+          <PremiumCard title="Delivery Health" subtitle="From Hive / ClickUp" icon={<Truck size={18} />} className="h-full">
             <div className="grid grid-cols-2 gap-3 mb-4">
               {[
-                { label: 'Open Tasks', value: ALL_CLIENTS.reduce((s, c) => s + c.openTasks, 0) },
-                { label: 'Overdue', value: ALL_CLIENTS.reduce((s, c) => s + c.overdueTasks, 0), accent: true },
-                { label: 'Delayed', value: ALL_CLIENTS.reduce((s, c) => s + c.delayedDeliverables, 0) },
-                { label: 'Blocked', value: ALL_CLIENTS.reduce((s, c) => s + c.blockedProjects, 0) },
+                { label: 'Open Tasks', value: ALL_CLIENTS.reduce((s, c) => s + c.openTasks, 0), bg: 'bg-indigo-50/30', text: 'text-indigo-600', border: 'border-indigo-100' },
+                { label: 'Overdue', value: ALL_CLIENTS.reduce((s, c) => s + c.overdueTasks, 0), bg: 'bg-rose-50/30', text: 'text-rose-600', border: 'border-rose-100' },
+                { label: 'Delayed', value: ALL_CLIENTS.reduce((s, c) => s + c.delayedDeliverables, 0), bg: 'bg-amber-50/30', text: 'text-amber-600', border: 'border-amber-100' },
+                { label: 'Blocked', value: ALL_CLIENTS.reduce((s, c) => s + c.blockedProjects, 0), bg: 'bg-purple-50/30', text: 'text-purple-600', border: 'border-purple-100' },
               ].map(item => (
-                <div key={item.label} className="rounded-xl bg-slate-50 p-4 text-center border border-slate-100">
-                  <div className={`text-xl font-bold ${item.accent ? 'text-rose-600' : 'text-[#142f45]'}`}>{item.value}</div>
-                  <div className="text-xs text-slate-500 mt-1">{item.label}</div>
+                <div key={item.label} className={`rounded-xl ${item.bg} ${item.border} border p-3 text-center transition-all duration-300 hover:scale-[1.03]`}>
+                  <div className={`text-2xl font-extrabold ${item.text} tracking-tight`}>{item.value}</div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide mt-1.5">{item.label}</div>
                 </div>
               ))}
             </div>
-            <div className="text-xs font-bold text-slate-500 uppercase mb-2">Overdue by Client</div>
+            <div className="text-xs font-bold text-slate-400 uppercase mb-2 tracking-wider">Overdue by Client</div>
             {overdueClients.slice(0, 4).map(c => (
               <div key={c.id}><ListRow title={c.name} value={`${c.overdueTasks} tasks`} valueAccent="text-rose-600" /></div>
             ))}
           </PremiumCard>
         </div>
 
-        {/* AI Recommendations + Relationship + Risk */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <PremiumCard title="AI Recommendations" subtitle="Actions for at-risk clients" icon={<Brain size={18} />} className="lg:col-span-1">
+        {/* Bottom Row: Equal Height Alignment */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          <PremiumCard title="AI Recommendations" subtitle="Actions for at-risk clients" icon={<Brain size={18} />} className="h-full">
             <div className="space-y-3">
               {atRiskClients.filter(c => c.aiRecommendations.length > 0).slice(0, 4).map(c => (
-                <div key={c.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                <div key={c.id} className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-white border border-slate-100 hover:border-amber-200 hover:shadow-sm transition-all duration-300 relative pl-5 border-l-4 border-l-[#ee683b]/60">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="font-bold text-[#142f45] text-sm">{c.name}</span>
+                    <span className="font-bold text-[#142f45] text-sm tracking-tight">{c.name}</span>
                     <RiskPill risk={c.risk} />
                   </div>
                   <ul className="space-y-1.5">
                     {c.aiRecommendations.slice(0, 2).map((r, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+                      <li key={i} className="flex items-start gap-2 text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
                         <ArrowUpRight size={14} className="text-[#ee683b] shrink-0 mt-0.5" />
-                        {r}
+                        <span>{r}</span>
                       </li>
                     ))}
                   </ul>
@@ -211,23 +201,23 @@ export default function MainDashboard() {
             </div>
           </PremiumCard>
 
-          <PremiumCard title="Relationship Health" icon={<Heart size={18} />}>
+          <PremiumCard title="Relationship Health" icon={<Heart size={18} />} className="h-full">
             <div className="space-y-3">
               {(ALL_CLIENTS.filter(c => c.meetingFrequency < 70).length > 0
                 ? ALL_CLIENTS.filter(c => c.meetingFrequency < 70)
                 : ALL_CLIENTS
               ).slice(0, 4).map(c => (
-                <div key={c.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50">
-                  <div className="font-semibold text-[#142f45] text-sm mb-3">{c.name}</div>
+                <div key={c.id} className="p-4 rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50/50 to-white hover:border-slate-200 transition-colors duration-300">
+                  <div className="font-bold text-[#142f45] text-sm mb-3.5 tracking-tight">{c.name}</div>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     {[
                       { label: 'Meetings', val: c.meetingFrequency },
                       { label: 'Email', val: c.emailEngagement },
                       { label: 'Response', val: c.responseRate },
                     ].map(m => (
-                      <div key={m.label}>
-                        <div className={`text-lg font-bold ${m.val >= 70 ? 'text-emerald-600' : m.val >= 50 ? 'text-amber-600' : 'text-rose-600'}`}>{m.val}%</div>
-                        <div className="text-[10px] text-slate-500 uppercase">{m.label}</div>
+                      <div key={m.label} className="p-1.5 rounded-xl bg-slate-50/60 border border-slate-100/50">
+                        <div className={`text-base font-extrabold ${m.val >= 70 ? 'text-emerald-600' : m.val >= 50 ? 'text-amber-600' : 'text-rose-600'}`}>{m.val}%</div>
+                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wide mt-1">{m.label}</div>
                       </div>
                     ))}
                   </div>
@@ -236,7 +226,7 @@ export default function MainDashboard() {
             </div>
           </PremiumCard>
 
-          <PremiumCard title="AI Risk Flags" icon={<Star size={18} />}>
+          <PremiumCard title="AI Risk Flags" icon={<Star size={18} />} className="h-full">
             <div className="space-y-1 -my-2">
               {aiRiskClients.map(c => (
                 <div key={c.id}>

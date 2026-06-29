@@ -18,6 +18,7 @@ export default defineConfig(() => {
           mainDashboard: path.resolve(__dirname, 'main-dashboard.html'),
           clients: path.resolve(__dirname, 'clients.html'),
           dashboard: path.resolve(__dirname, 'dashboard.html'),
+          settings: path.resolve(__dirname, 'settings.html'),
         },
       },
     },

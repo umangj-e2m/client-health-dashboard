@@ -2,19 +2,76 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search, AlertCircle, CheckCircle2, ArrowRight,
-  TrendingUp, TrendingDown, Users, ChevronLeft, ChevronRight,
+  TrendingUp, TrendingDown, Users, ChevronLeft, ChevronRight, Plus,
 } from 'lucide-react';
 import { AppShell } from './components/AppShell';
 import { StatusDot } from './components/StatusDot';
-import { ALL_CLIENTS, navigateToClientDashboard } from './data/clients';
+import { ALL_CLIENTS, Client, navigateToClientDashboard } from './data/clients';
+import AddClientModal, { NewClientFormData } from './components/AddClientModal';
 
 const PAGE_SIZE = 15;
+
+function makeNewClient(data: NewClientFormData, existingCount: number): Client {
+  return {
+    id: existingCount + 1,
+    name: data.name,
+    status: 'green',
+    category: 'HVAC',
+    score: 0,
+    alerts: 0,
+    trend: 'flat',
+    revenue: '$0',
+    lastChecked: 'Just now',
+    healthScore: 0,
+    risk: 'Low',
+    churnRisk: 0,
+    accountManager: '—',
+    lifecycleStage: 'Onboarding',
+    monthlyChange: 0,
+    lastMeeting: '—',
+    lastEmailReply: '—',
+    lastTouchpoint: '—',
+    daysSinceContact: 0,
+    openTasks: 0,
+    overdueTasks: 0,
+    delayedDeliverables: 0,
+    blockedProjects: 0,
+    trafficGrowth: 0,
+    leadGrowth: 0,
+    revenueGrowth: 0,
+    roasTrend: 0,
+    seoHealth: 0,
+    ppcHealth: 0,
+    gbpHealth: 0,
+    websiteHealth: 0,
+    satisfactionScore: 0,
+    revenueDeclinePct: 0,
+    consecutiveDecliningMonths: 0,
+    negativeReviews: 0,
+    ratingDrop: 0,
+    meetingFrequency: 0,
+    emailEngagement: 0,
+    responseRate: 0,
+    executiveInvolvement: 0,
+    breakdown: { traffic: 0, leads: 0, revenue: 0, sentiment: 0, delivery: 0, communication: 0 },
+    aiFlags: [],
+    aiRecommendations: [],
+    redFlags: [],
+    upsellOpportunity: false,
+    crossSellOpportunity: false,
+    budgetIncreaseSignal: false,
+  };
+}
 
 export default function ClientsPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [extraClients, setExtraClients] = useState<Client[]>([]);
 
-  const filteredClients = ALL_CLIENTS.filter(client => {
+  const allClients = [...ALL_CLIENTS, ...extraClients];
+
+  const filteredClients = allClients.filter(client => {
     if (search && !client.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -30,6 +87,12 @@ export default function ClientsPage() {
     setPage(Math.max(1, Math.min(p, totalPages)));
   };
 
+  const handleSaveClient = (data: NewClientFormData) => {
+    const newClient = makeNewClient(data, allClients.length);
+    setExtraClients(prev => [newClient, ...prev]);
+    setModalOpen(false);
+  };
+
   return (
     <AppShell
       activeNav="clients"
@@ -37,19 +100,36 @@ export default function ClientsPage() {
       titleIcon={<Users size={20} className="text-[#607484]" />}
     >
       <div className="relative z-10 px-8 pt-6 pb-8 w-full min-h-full flex flex-col">
-        <div className="flex justify-between items-center mb-6 z-20">
+        {/* Top bar */}
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6 z-20">
           <div className="text-lg font-bold text-[#142f45] tracking-tight">
             All Clients ({filteredClients.length})
           </div>
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search clients..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e6dec9] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#142f45]/20 focus:border-[#142f45] transition-all placeholder:text-slate-400 shadow-sm"
-            />
+
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder="Search clients..."
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-[#e6dec9] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#142f45]/20 focus:border-[#142f45] transition-all placeholder:text-slate-400 shadow-sm"
+              />
+            </div>
+
+            {/* Add Client Button */}
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#142f45] text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-[#0d1f2d] transition-colors cursor-pointer"
+              id="add-client-btn"
+            >
+              <Plus size={16} />
+              Add Client
+            </motion.button>
           </div>
         </div>
 
@@ -63,7 +143,7 @@ export default function ClientsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#f8fafc] border-b border-[#e6dec9] text-[#64748b] text-xs uppercase tracking-wider">
-                  <th className="px-6 py-4 font-bold whitespace-nowrap">Health Status & Client</th>
+                  <th className="px-6 py-4 font-bold whitespace-nowrap">Health Status &amp; Client</th>
                   <th className="px-6 py-4 font-bold">Category</th>
                   <th className="px-6 py-4 font-bold">Health Score</th>
                   <th className="px-6 py-4 font-bold">Risk</th>
@@ -194,6 +274,13 @@ export default function ClientsPage() {
           )}
         </motion.div>
       </div>
+
+      {/* Add Client Modal */}
+      <AddClientModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveClient}
+      />
     </AppShell>
   );
 }
